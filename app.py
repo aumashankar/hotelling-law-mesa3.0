@@ -1,45 +1,85 @@
 from mesa.experimental import JupyterViz
 from model import HotellingModel
+import matplotlib.pyplot as plt
+import numpy as np
+import solara
 
 
 # This function defines how agents are visually represented in the simulation.
 def agent_portrayal(agent):
-    # Basic portrayal with agents shown as circles.
-    portrayal = {
-        "Shape": "circle",  # The shape of the agent in the visualization.
-        "r": 0.8,  # Radius of the circle, determining the size of the agent.
-        "Filled": "true",  # Specifies that the shape should be filled.
-        "Layer": 0,  # The layer on which the agent is drawn.
-        # Lower numbers are drawn first.
-    }
+    size = 50  # Default size
+    color = "grey"  # Default color for agents
 
     # Check if the agent has a 'price' attribute.
     # This is to ensure compatibility
     # with different types of agents.
     if hasattr(agent, "price"):
-        # The color of the agent is determined by its price to visualize
-        # the pricing strategy dynamically.
+        # Adjust color based on the price attribute of the StoreAgent
         if agent.price > 12:
-            portrayal[
-                "color"
-            ] = "#FF0000"  # Agents with a price above 12 are colored red,
-            # indicating higher prices.
+            color = "#FF0000"  # Higher prices in red
         elif agent.price > 8:
-            portrayal["color"] = "#FFA500"  # Agents with a price above 8 and
-            # up to 12 are colored orange,indicating moderate prices.
+            color = "#FFA500"  # Moderate prices in orange
         else:
-            portrayal["color"] = "#00FF00"  # Agents with a price of 8 or below
-            # are colored green,indicating lower prices.
-
+            color = "#00FF00"  # Lower prices in green
+    # Construct and return the portrayal dictionary
+    portrayal = {
+        "size": size,
+        "color": color,
+    }
     return portrayal  # Return the portrayal dictionary to be used by
     # the visualization engine.
+
+
+def space_drawer(model, agent_portrayal):
+    plt.close('all')  # Ensure previously opened figures are closed to manage memory
+    # Smaller figure size
+    fig, ax = plt.subplots(figsize=(8, 5), dpi=100)  # Adjust figure size here
+
+    # Define grid lines
+    ticks = np.arange(0, model.grid.width + 1, 1)
+    ax.set_xticks(ticks, minor=False)
+    ax.set_yticks(ticks, minor=False)
+    ax.grid(which="both", color="gray", linestyle='-', linewidth=0.5)
+    ax.tick_params(which="both", size=0)  # Hide grid ticks
+
+    # Set axis limits and aspect
+    ax.set_xlim(0, model.grid.width)
+    ax.set_ylim(0, model.grid.height)
+    ax.set_aspect('equal')
+
+    # Hide major tick labels
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+
+    # Plotting agents
+    x_vals = []
+    y_vals = []
+    colors = []
+    sizes = []
+    for agent in model.schedule.agents:
+        portrayal = agent_portrayal(agent)
+        x, y = agent.pos
+        x_vals.append(x + 0.5)  # Centering the dot in the grid cell
+        y_vals.append(y + 0.5)
+        colors.append(portrayal.get("color", "black"))
+        sizes.append(portrayal.get("size", 100))  # Adjusted size for smaller figure
+
+    ax.scatter(x_vals, y_vals, c=colors, s=sizes, linewidths=0.5, edgecolors="black", alpha=0.6)
+
+    # Invert y-axis to match grid origin (bottom-left)
+    ax.invert_yaxis()
+
+    # Adjust layout
+    plt.tight_layout()  # This can help with making better use of the available space
+
+    return solara.FigureMatplotlib(fig)
 
 
 model_params = {
     "N": {
         "type": "SliderInt",
         "value": 20,
-        "label": "Number of agents:",
+        "label": "Number of stores:",
         "min": 10,
         "max": 100,
         "step": 1,
@@ -60,9 +100,9 @@ model_params = {
         "type": "SliderInt",
         "value": 100,
         "label": "Mobility Rate (%):",
-        "min": 1,
+        "min": 10,
         "max": 100,
-        "step": 1,
+        "step": 5,
     },
     "width": {
         "type": "SliderInt",
@@ -70,7 +110,7 @@ model_params = {
         "label": "Grid Width:",
         "min": 10,
         "max": 50,
-        "step": 1,
+        "step": 5,
     },
     "height": {
         "type": "SliderInt",
@@ -78,7 +118,7 @@ model_params = {
         "label": "Grid Height:",
         "min": 10,
         "max": 50,
-        "step": 1,
+        "step": 5,
     },
 }
 
@@ -89,6 +129,7 @@ page = JupyterViz(
     measures=["Average Price", "Total Revenue", "Price Variance"],
     name="Hotelling's Law Model",
     agent_portrayal=agent_portrayal,
+    space_drawer=space_drawer,
 )
 
 # Display the visualization in the Jupyter Notebook

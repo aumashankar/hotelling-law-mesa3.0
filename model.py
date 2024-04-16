@@ -2,7 +2,7 @@
 import numpy as np
 from mesa import Model
 from mesa.datacollection import DataCollector
-from mesa.space import MultiGrid, SingleGrid
+from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 
 from agents import (
@@ -82,8 +82,8 @@ class HotellingModel(Model):
     def __init__(
             self,
             N=10,
-            width=50,
-            height=50,
+            width=10,
+            height=10,
             mode="default",
             environment_type="grid",
             mobility_rate=80,
@@ -109,8 +109,8 @@ class HotellingModel(Model):
                 width, height, True
             )  # A grid where multiple agents can occupy the same cell.
         elif environment_type == "line":
-            self.grid = SingleGrid(
-                width, height, True
+            self.grid = MultiGrid(
+                1, height, True
             )  # A grid representing a line (single occupancy per cell).
 
         self._initialize_agents()
@@ -122,7 +122,6 @@ class HotellingModel(Model):
                 "Total Revenue": compute_total_revenue,
                 "Price Variance": compute_price_variance,
             }
-            , agent_reporters={"Wealth": "wealth"}
         )
 
     # Private method to initialize and place agents on the grid.
@@ -132,51 +131,18 @@ class HotellingModel(Model):
         )  # Calculate number of mobile agents.
         mobile_agents_assigned = 0
 
-        # Different logic for placing agents based on the environment type.
-        if self.environment_type == "line":
-            middle_x = (
-                    self.grid.width // 2
-            )  # For a line environment, agents are placed along
-            # the middle axis.
-            available_positions = set(
-                range(self.grid.height)
-            )  # Track available positions for placement.
-            max_agents = len(available_positions)
+        for unique_id in range(self.num_agents):
+            can_move = mobile_agents_assigned < num_mobile_agents
+            if can_move:
+                mobile_agents_assigned += 1
 
-            if self.num_agents > max_agents:
-                print(
-                    f"Adjusting number of agents from {self.num_agents} to {max_agents} "
-                    f"due to limited positions in line environment.")
-                self.num_agents = max_agents
+            agent = StoreAgent(unique_id, self, can_move=can_move)
+            self.schedule.add(agent)
 
-            for unique_id in range(self.num_agents):
-                if not available_positions:
-                    raise ValueError("No more available positions to place agents.")
-
-                can_move = mobile_agents_assigned < num_mobile_agents
-                if can_move:
-                    mobile_agents_assigned += 1
-
-                agent = StoreAgent(unique_id, self, can_move=can_move)
-                self.schedule.add(agent)
-
-                y_position = self.random.choice(list(available_positions))
-                available_positions.remove(y_position)
-                initial_position = (middle_x, y_position)
-                self.grid.place_agent(agent, initial_position)
-        else:
-            for unique_id in range(self.num_agents):
-                can_move = mobile_agents_assigned < num_mobile_agents
-                if can_move:
-                    mobile_agents_assigned += 1
-
-                agent = StoreAgent(unique_id, self, can_move=can_move)
-                self.schedule.add(agent)
-
-                # Randomly place agents on the grid for a grid environment.
-                x = self.random.randrange(self.grid.width)
-                y = self.random.randrange(self.grid.height)
-                self.grid.place_agent(agent, (x, y))
+            # Randomly place agents on the grid for a grid environment.
+            x = self.random.randrange(self.grid.width)
+            y = self.random.randrange(self.grid.height)
+            self.grid.place_agent(agent, (x, y))
 
     # Method to advance the simulation by one step.
     def step(self):
