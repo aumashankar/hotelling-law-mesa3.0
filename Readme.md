@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is an agent-based model implemented using the Mesa framework in Python. It simulates market dynamics based on Hotelling's Law, exploring the behavior of stores in a competitive market environment. Stores adjust their prices and locations to maximize revenue, providing insights into the effects of competition and customer behavior on market outcomes.
+This project is an agent-based model implemented using the Mesa framework in Python. It simulates market dynamics based on Hotelling's Law, exploring the behavior of stores in a competitive market environment. Stores adjust their prices and locations if it's increases market share to maximize revenue, providing insights into the effects of competition and customer behavior on market outcomes.
 
 ## Hotelling's Law
 
@@ -12,12 +12,7 @@ Hotelling's Law is an economic theory that predicts competitors in a market will
 
 To run this simulation, you will need Python 3.x and the following Python libraries:
 
-- Mesa
-- solara
-- Pandas
-- Matplotlib
-- Numpy
-- jupyter
+- mesa
 - scipy
 
 You can install all required libraries by running:
@@ -29,13 +24,16 @@ pip install -r requirements.txt
 ## Project Structure
 
 ```plaintext
-hotelling-law-mesa/
+
+hotelling-law-mesa3.0/
 ├── __init__.py
-├── agents.py
 ├── model.py
+├── agents.py
 ├── app.py
+├── Readme.md
 ├── requirements.txt
 └── tests.py
+
 ```
 
 ## Running the Simulation
@@ -51,18 +49,6 @@ solara run app.py
 ### Professor: [Vipin P. Veetil](https://www.vipinveetil.com/)
 ### Indian Institute of Management, Kozhikode
 
-### Project by
 
-| Group 8 |                           |               |
-|-|---------------------------|---------------|
-| Name | Email Id                  | Roll No       |
-| Amrita Tripathy | amrita15d@iimk.edu.in     | EPGP-15D-010  |
-| Anirban Mondal | anirban15e@iimk.edu.in    | EPGP-15E-006  |
-| Namita Das | namita15d@iimk.edu.in     | EPGP-15D-046  |
-| Sandeep Shenoy | sandeep15c@iimk.edu.in    | EPGP-15C-076  |
-| Sanjeeb Kumar Dhinda | sanjeeb15d@iimk.edu.in | EPGP-15D-074  |
-| Umashankar Ankuri | umashankar15d@iimk.edu.in | EPGP-15D-096  |
-| Vinayak Nair | vinayak15d@iimk.edu.in    | EPGP-15D-102  |
-| Wayne Joseph Unger | wayne15d@iimk.edu.in    | EPGP-15D-104  |
-
-
+### Hotelling Law Simulation - Visualization
+![plot](hotelling_law_sim.png)
