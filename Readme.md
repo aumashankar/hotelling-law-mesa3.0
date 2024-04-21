@@ -14,7 +14,9 @@ To run this simulation, you will need Python 3.x and the following Python librar
 
 - mesa
 - scipy
-
+- numpy
+- matplotlib
+- solara
 You can install all required libraries by running:
 
 ```bash
